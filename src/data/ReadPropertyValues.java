@@ -18,9 +18,9 @@ public class ReadPropertyValues extends MainClass {
     InputStream input = null;
 
     try {
-      input = new FileInputStream("./application.properties");
-    } catch (IOException ex) {
       input = new FileInputStream("config.properties");
+    } catch (IOException ex) {
+      input = new FileInputStream("./application.properties");
     } finally {
       prop.load(input);
 
@@ -34,7 +34,7 @@ public class ReadPropertyValues extends MainClass {
       pvalue_nrowchecks = Double.valueOf(prop.getProperty("pvalue_nrowchecks"));
 
 
-      executeSQLInserts = Boolean.valueOf(prop.getProperty("executesqlinserts"));
+      executeSQLqueries = Boolean.valueOf(prop.getProperty("executeSQLqueries"));
 
       geonames_dbdriver = prop.getProperty("geonames_dbdriver");
       geonames_dburl = prop.getProperty("geonames_dburl");

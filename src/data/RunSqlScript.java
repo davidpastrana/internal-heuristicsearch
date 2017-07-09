@@ -5,27 +5,60 @@ import java.io.FileReader;
 import java.io.Reader;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ibatis.common.jdbc.ScriptRunner;
 
 public class RunSqlScript extends MainClass {
-
+	
+   private final static Logger log = LoggerFactory.getLogger(RunSqlScript.class);
+   private static int new_id=0;
+   
   public static void runSqlScript() throws ClassNotFoundException, SQLException {
 
-    String sqlScriptFilePath = processed_dir + sqlinserts_file;
+    String sqlScriptFilePath = sqlinserts_file;
 
     Class.forName(web_dbdriver);
-    Connection con = DriverManager.getConnection(web_dburl, web_dbusr, web_dbpwd);
+    Connection conn = DriverManager.getConnection(web_dburl, web_dbusr, web_dbpwd);
 
     try {
+    	String sql = "SELECT max(id) FROM locations";
+    	PreparedStatement ps = conn.prepareStatement(sql);
+    	ResultSet rs = ps.executeQuery();
+    	
+    	String line;
 
-      ScriptRunner sr = new ScriptRunner(con, false, false);
-      Reader reader = new BufferedReader(new FileReader(sqlScriptFilePath));
-      sr.runScript(reader);
+    	while(rs.next()) {
+    		new_id = Integer.valueOf(rs.getString(1));
+
+    		log.info("new id "+new_id);
+    	}
+    	rs.close();
+    	Statement st = conn.createStatement();
+    	BufferedReader br = new BufferedReader(new FileReader(sqlScriptFilePath));
+    	while ((line = br.readLine()) != null) {
+    		    new_id++;
+    		    line = line.replaceFirst("\\(", "(id,").replace("VALUES(", "VALUES("+new_id+",");
+
+			log.info(line);
+
+    	    st.executeUpdate(line);
+	}
+    	st.close();
+    	
+      //ScriptRunner sr = new ScriptRunner(conn, false, false);
+      //Reader reader = new BufferedReader(new FileReader(sqlScriptFilePath));
+      //log.info("Executing file: "+sqlScriptFilePath);
+     // sr.runScript(reader);
 
     } catch (Exception e) {
-      System.err.println("Failed to Execute" + sqlScriptFilePath + " The error is "
+      System.err.println("Failed to Execute" + sqlScriptFilePath + ", error: "
           + e.getMessage());
     }
   }

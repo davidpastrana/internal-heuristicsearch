@@ -43,6 +43,9 @@ public class MainClass {
 
   public static boolean geonamesdebugmode = false;
   protected static boolean fieldtypesdebugmode = false;
+  
+  public static boolean removeSQLExistingData = false;
+  public static boolean executeSQLqueries = false;
 
   protected static int nrowchecks = 20;
   protected static double pvalue_nrowchecks = 0.5;
@@ -56,20 +59,22 @@ public class MainClass {
   protected static final String DELIMITER2 = ",";
   protected static final String NEW_LINE = "\n";
 
-  protected static boolean executeSQLInserts = false;
+
 
   protected static String country_code = "AT";
 
   protected static String shapes_file = "/NUTS_2013_SHP/data/NUTS_RG_01M_2013.shp";
 
   // Directories where files are processed
-  protected static String sqlinserts_file = "sql_inserts.sql";
-  protected static String csvfiles_dir = "/Users/david/Desktop/at_dump_v1/wwdagvat/";
-  protected static String tmp_dir = "tmp/";
-  protected static String processed_dir = "processed/";
-  protected static String newformat_dir = "new_format/";
-  protected static String enriched_dir = "enriched/";
-  protected static String missinggeoreference_dir = "discarded_files/";
+  protected static String csvfiles_dir = "file: config.properties";
+
+  protected static String tmp_dir = "file: config.properties";
+  protected static String processed_dir = "file: config.properties";
+  protected static String newformat_dir = "file: config.properties";
+  protected static String enriched_dir = "file: config.properties";
+  protected static String missinggeoreference_dir = "file: config.properties";
+  protected static String sqlinserts_file = "file: config.properties";
+
 
   protected static String geonames_dbdriver = "org.postgresql.Driver";
   protected static String geonames_dburl = "jdbc:postgresql://127.0.0.1:5432/geonames";
@@ -1000,6 +1005,9 @@ public class MainClass {
 
     ReadPropertyValues.getPropValues();
 
+    
+
+    	
     try {
       Class.forName(geonames_dbdriver);
     } catch (ClassNotFoundException e) {
@@ -1021,16 +1029,13 @@ public class MainClass {
       log.info("Failed to make DB connection!");
     }
 
-
+    
+    if (!executeSQLqueries) {
 
     log.info("Creating directories...");
 
 
-    tmp_dir = csvfiles_dir + tmp_dir;
-    processed_dir = tmp_dir + processed_dir;
-    newformat_dir = processed_dir + newformat_dir;
-    enriched_dir = processed_dir + enriched_dir;
-    missinggeoreference_dir = processed_dir + missinggeoreference_dir;
+
 
     createDir(tmp_dir);
     createDir(processed_dir);
@@ -1082,8 +1087,10 @@ public class MainClass {
     }
 
     bw_sql_inserts.close();
+  }
 
-    if (executeSQLInserts) {
+    if (executeSQLqueries) {
+
       RunSqlScript.runSqlScript();
     }
 

@@ -22,8 +22,11 @@ public class GenerateSQLStatements extends MainClass {
     int i = 0;
     String line;
 
-    // we remove content of table locations
-    buffer.append("TRUNCATE locations CASCADE;");
+    if(removeSQLExistingData) {
+    		// remove all existing content from table locations
+    		buffer.append("TRUNCATE locations CASCADE;");
+    }
+    
     while ((line = br.readLine()) != null) {
 
       // we do not insert the header
