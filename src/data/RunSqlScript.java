@@ -41,7 +41,13 @@ public class RunSqlScript extends MainClass {
     	}
     	rs.close();
     	Statement st = conn.createStatement();
+    	
     	BufferedReader br = new BufferedReader(new FileReader(sqlScriptFilePath));
+    	
+    	if (br.readLine() == null) {
+    	    log.info("File empty! No inserts to execute.\nYou must first create the SQL inserts (executeSQLqueries=false): "+sqlinserts_file);
+    	}
+    	
     	while ((line = br.readLine()) != null) {
     		    new_id++;
     		    line = line.replaceFirst("\\(", "(id,").replace("VALUES(", "VALUES("+new_id+",");
@@ -51,6 +57,9 @@ public class RunSqlScript extends MainClass {
     	    st.executeUpdate(line);
 	}
     	st.close();
+    	br.close();
+    	ps.close();
+    	rs.close();
     	
       //ScriptRunner sr = new ScriptRunner(conn, false, false);
       //Reader reader = new BufferedReader(new FileReader(sqlScriptFilePath));
