@@ -44,7 +44,7 @@ public class MainClass {
   public static boolean geonamesdebugmode = false;
   protected static boolean fieldtypesdebugmode = false;
   
-  public static boolean removeSQLExistingData = false;
+  public static boolean removeExistingBData = false;
   public static boolean executeSQLqueries = false;
 
   protected static int nrowchecks = 20;
@@ -124,6 +124,8 @@ public class MainClass {
   // csv file name
   private static String name = "";
 
+  private static String header[] = null;
+  
   private static String columnTypes[][] = null;
   private static int sum[][] = null;
 
@@ -168,7 +170,7 @@ public class MainClass {
   public static void findFieldTypes(String dir, String name) throws NumberFormatException,
       CQLException, IOException, NumberParseException, SQLException {
 
-    br = new BufferedReader(new InputStreamReader(new FileInputStream(dir + name), "utf-8"));
+    br = new BufferedReader(new InputStreamReader(new FileInputStream(dir + name), "iso-8859-1"));
 
     double confidence_limit = (nrowchecks * (100 - pvalue_nrowchecks * 100)) / 100;
 
@@ -196,6 +198,7 @@ public class MainClass {
           // log.info("DELIMITER IS COMMA!!");
         }
 
+        // we first detect the first header row
         if (line != null) {
 
           // split by delimiter with unlimited tokens having empty space
@@ -205,7 +208,20 @@ public class MainClass {
           log.info("file: " + name);
           log.info("columns detected: " + ncolchecks);
           log.info("--delimiter detected: \"" + DELIMITER + "\"");
-          log.info("header detected: " + line);
+          
+          
+          
+          header = new String[ncolchecks];
+          String[]  value = new String[ncolchecks];
+          
+          value = line.split(DELIMITER);
+          
+          for (int j = 0; j < value.length; j++) {
+              header[j] = value[j].substring(0, 1).toUpperCase() + value[j].substring(1).toLowerCase();
+          }
+          log.info("header detected: "+java.util.Arrays.toString(header));
+          
+          
           log.info("processing pls wait...");
 
           // exception for some files with a not defined header
@@ -227,8 +243,10 @@ public class MainClass {
           tmp_cities = new String[ncolchecks];
           tmp_possiblenames = new String[ncolchecks];
           tmp_postcol = new boolean[ncolchecks];
-          resul = new String[ncolchecks];
+          resul = new String[ncolchecks*2]; //we duplicate the number of columns just to be shure we don't get a segmentation fault
         }
+        
+        // exception for some headers (which are not in the first row) , where we will remove "," inside quotes for csv files with "," delimiter
       } else if (i < nrowchecks) {
 
         // log.info("line: " + i + " -------------------------------------------------");
@@ -823,6 +841,7 @@ public class MainClass {
 
         loc.setCsvName(name);
 
+        //log.info("index is "+j+ " with size "+resul.length);
         if (resul[j] != null) {
           switch (resul[j]) {
             case "email":
@@ -948,11 +967,19 @@ public class MainClass {
               break;
           }
         } else {
+        	if (header[j] != null) {
+                if (loc.getOther() == null) {
+                    loc.setOther(header[j]+": " + value[j]);
+                  } else {
+                    loc.setOther(loc.getOther() + " ## "+header[j]+": " + value[j]);
+                  }
+        	} else {
           if (loc.getOther() == null) {
             loc.setOther("no_match[" + j + "]: " + value[j]);
           } else {
-            loc.setOther(loc.getOther() + "| no_match[" + j + "]: " + value[j]);
+            loc.setOther(loc.getOther() + " ## no_match[" + j + "]: " + value[j]);
           }
+        }
         }
 
         j++;
@@ -1047,7 +1074,7 @@ public class MainClass {
 
 
     BufferedWriter bw_sql_inserts =
-        new BufferedWriter(new FileWriter(new File(processed_dir + sqlinserts_file)));
+        new BufferedWriter(new FileWriter(new File(sqlinserts_file)));
 
     // PrintWriter out_sql_bestfiles_buffer = new PrintWriter(sql_bestfiles_buffer);
     // PrintWriter out_sql_nutsfiles_buffer = new PrintWriter(sql_nutsfiles_buffer);
@@ -1069,8 +1096,8 @@ public class MainClass {
 
             findFieldTypes(csvfiles_dir, name);
             GenerateCSVFiles.copyFile(file, new File(tmp_dir + name));
-            processFile(file, new File(processed_dir + "new_format/" + name));
-            GenerateSQLStatements.createSQLInserts(new File(processed_dir + "new_format/" + name),
+            processFile(file, new File(newformat_dir + name));
+            GenerateSQLStatements.createSQLInserts(new File(newformat_dir + name),
                 bw_sql_inserts);
           }
         }
@@ -1079,8 +1106,8 @@ public class MainClass {
 
           findFieldTypes(csvfiles_dir, name);
           GenerateCSVFiles.copyFile(file, new File(tmp_dir + name));
-          processFile(file, new File(processed_dir + "new_format/" + name));
-          GenerateSQLStatements.createSQLInserts(new File(processed_dir + "new_format/" + name),
+          processFile(file, new File(newformat_dir + name));
+          GenerateSQLStatements.createSQLInserts(new File(newformat_dir + name),
               bw_sql_inserts);
         }
       }

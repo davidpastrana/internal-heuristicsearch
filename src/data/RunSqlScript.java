@@ -28,7 +28,17 @@ public class RunSqlScript extends MainClass {
     Connection conn = DriverManager.getConnection(web_dburl, web_dbusr, web_dbpwd);
 
     try {
-    	String sql = "SELECT max(id) FROM locations";
+    	
+    	Statement st = conn.createStatement();
+    if(removeExistingBData) {
+    		// remove all existing content from table locations
+    		log.info("Removing existing data...");
+    		st.executeUpdate("TRUNCATE locations CASCADE;");
+    		log.info("ok");
+    }
+    	
+    	// we return the greatest id or 0 as the starting id
+    	String sql = "SELECT coalesce(max(id), 0) FROM locations";
     	PreparedStatement ps = conn.prepareStatement(sql);
     	ResultSet rs = ps.executeQuery();
     	
@@ -40,14 +50,14 @@ public class RunSqlScript extends MainClass {
     		log.info("new id "+new_id);
     	}
     	rs.close();
-    	Statement st = conn.createStatement();
+
     	
     	BufferedReader br = new BufferedReader(new FileReader(sqlScriptFilePath));
     	
     	if (br.readLine() == null) {
     	    log.info("File empty! No inserts to execute.\nYou must first create the SQL inserts (executeSQLqueries=false): "+sqlinserts_file);
     	}
-    	
+        
     	while ((line = br.readLine()) != null) {
     		    new_id++;
     		    line = line.replaceFirst("\\(", "(id,").replace("VALUES(", "VALUES("+new_id+",");
@@ -67,7 +77,7 @@ public class RunSqlScript extends MainClass {
      // sr.runScript(reader);
 
     } catch (Exception e) {
-      System.err.println("Failed to Execute" + sqlScriptFilePath + ", error: "
+      System.err.println("Failed to Execute " + sqlScriptFilePath + ", error: "
           + e.getMessage());
     }
   }
