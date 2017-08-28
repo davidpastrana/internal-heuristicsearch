@@ -15,11 +15,21 @@
         </configuration>
       </plugin>
     </plugins>
-    
+    		<resources>
+			<resource>
+				<directory>src</directory>
+				<includes>
+					<include>META-INF/persistence.xml</include>
+				</includes>
+			</resource>
+		</resources>
   </build>
   	<properties>
   		<postgresql.version>9.1-901-1.jdbc4</postgresql.version>
   		<geonames.version>1.0</geonames.version>
+  		<spring.version>4.3.1.RELEASE</spring.version>
+  		<hibernate.version>5.2.10.Final</hibernate.version>
+  		<dbcp.version>1.4</dbcp.version>
 		<jena.version>3.1.0</jena.version>
 		<nominatim.version>1.9.4</nominatim.version>
 		<geotools.version>15-RC1</geotools.version>
@@ -40,7 +50,61 @@
     <artifactId>ibatis-sqlmap</artifactId>
     <version>2.3.4.726</version>
 </dependency>
-		
+         <!-- Spring -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-core</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-jdbc</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-orm</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+	    <!-- Hibernate -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+			<version>${hibernate.version}</version>
+			<exclusions>
+                <exclusion>
+                    <groupId>org.javassist</groupId>
+                    <artifactId>javassist</artifactId>
+                </exclusion>
+            </exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-entitymanager</artifactId>
+			<version>${hibernate.version}</version>
+			<exclusions>
+                <exclusion>
+                    <groupId>org.javassist</groupId>
+                    <artifactId>javassist</artifactId>
+                </exclusion>
+            </exclusions>
+		</dependency>
+		<!-- dbcp -->
+		<dependency>
+			<groupId>commons-dbcp</groupId>
+			<artifactId>commons-dbcp</artifactId>
+			<version>${dbcp.version}</version>
+		</dependency>
 		<!-- PostgreSQL for Geonames -->
 		<dependency>
 		    <groupId>postgresql</groupId>
@@ -126,6 +190,12 @@
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
 			<version>${log4j.version}</version>
+		</dependency>
+		<!-- other -->
+		<dependency>
+		    <groupId>javassist</groupId>
+		    <artifactId>javassist</artifactId>
+		    <version>3.12.1.GA</version>
 		</dependency>
 		<!-- JUnit Mockito -->
 		<dependency>

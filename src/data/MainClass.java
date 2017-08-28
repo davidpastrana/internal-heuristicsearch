@@ -18,6 +18,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.validator.EmailValidator;
@@ -26,6 +30,9 @@ import org.geonames.InvalidParameterException;
 import org.geotools.filter.text.cql2.CQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
@@ -1014,6 +1021,8 @@ public class MainClass {
 
   private static BufferedReader br;
 
+private static EntityManagerFactory entityManagerFactory;
+
 
 
   public static void createDir(String dir) throws IOException {
@@ -1031,6 +1040,92 @@ public class MainClass {
       NumberParseException, ClassNotFoundException {
 
     ReadPropertyValues.getPropValues();
+    
+    ApplicationContext context = new ClassPathXmlApplicationContext(
+            "classpath*:**/applicationContext.xml");
+    
+
+    //ApplicationContext context = new ClassPathXmlApplicationContext("applicationContext.xml");
+
+    PropertiesModel p = new PropertiesModel();
+ 	p.setTestmode("false");
+ 	p.setTestfile("httpckan.data.ktn.gv.atstoragef20140630T133A123A02.832Zsteuergem12.csv");
+ 	
+ 	p.setRemoveExistingBData("true");
+ 	p.setExecuteSQLqueries("false");
+ 	
+ 	p.setGeonamesdebugmode("false");
+ 	p.setFieldtypesdebugmode("false");
+ 	
+ 	p.setCsvfiles_dir("/Users/david/Desktop/at_dump_v1/wwdagvat/");
+ 	p.setTmp_dir("/Users/david/Desktop/at_dump_v1/wwdagvat/tmp/");
+ 	p.setProcessed_dir("/Users/david/Desktop/at_dump_v1/wwdagvat/tmp/processed/");
+ 	p.setNewformat_dir("/Users/david/Desktop/at_dump_v1/wwdagvat/tmp/processed/new_format/");
+ 	p.setEnriched_dir("/Users/david/Desktop/at_dump_v1/wwdagvat/tmp/processed/enriched/");
+ 	p.setMissinggeoreference_dir("/Users/david/Desktop/at_dump_v1/wwdagvat/tmp/processed/discarded_files/");
+ 	p.setSqlinserts_file("/Users/david/Desktop/at_dump_v1/wwdagvat/tmp/processed/sql_inserts.sql");
+ 	
+ 	     	p.setNrowchecks("20");
+ 	     	p.setPvalue_nrowchecks("0.3");
+ 	     	p.setImageRegex(".*.(jpg|gif|png|bmp|ico)$");
+ 	     	p.setPhoneRegex("^\\\\+?[0-9. ()-]{10,25}$");
+ 	     	p.setCityRegex(".*[a-z]{3,30}.*");
+ 	     	p.setArchiveRegex(".*.(zip|7z|bzip(2)?|gzip|jar|t(ar|gz)|dmg)$");
+ 	     	p.setDocumentRegex(".*.(doc(x|m)?|pp(t|s|tx)|o(dp|tp)|pub|pdf|csv|xls(x|m)?|r(tf|pt)|info|txt|tex|x(ml|html|ps)|rdf(a|s)?|owl)$");
+ 	     	p.setOpeninghoursRegex("([a-z ]+ )?(mo(n(day)?)?|tu(e(s(day)?)?)?|we(d(nesday)?)?|th(u(r(s(day)\\u200C\\u200B?)?)?)?|fr(i(day)?)?\\u200C\\u200B|sa(t(urday)?)?|su(n\\u200C\\u200B(day)?)?)(-|:| ).*|([a-z ]+ )?(mo(n(tag)?)?|di(e(n(stag)?)?)?|mi(t(woch)?)?|do(n(er(s(tag)\\u200C\\u200B?)?)?)?|fr(i(tag)?)?\\u200C\\u200B|sa(m(stag)?)?|do(n(erstag)?)?)(-|:| ).*");
+ 	     	p.setDateRegex("([0-9]{2})?[0-9]{2}( |-|\\\\/|.)[0-3]?[0-9]( |-|\\\\/|.)([0-9]{2})?[0-9]{2}");
+ 	     	p.setYearRegex("^(?:18|20)\\\\d{2}$");
+ 	     	p.setCurrencyRegex("^(\\\\d+|\\\\d+[.,']\\\\d+)\\\\p{Sc}|\\\\p{Sc}(\\\\d+|\\\\d+[.,']\\\\d+)$");
+ 	     	p.setPercentageRegex("^(\\\\d+|\\\\d+[.,']\\\\d+)%|%(\\\\d+|\\\\d+[.,']\\\\d+)$");
+ 	     	p.setPostcodeRegex("^[0-9]{2}$|^[0-9]{4}$");
+ 	     	p.setNutsRegex("\\\\w{3,5}");
+ 	     	
+ 	     	p.setShapeRegex("point\\\\s*\\\\(([+-]?\\\\d+\\\\.?\\\\d+)\\\\s*,?\\\\s*([+-]?\\\\d+\\\\.?\\\\d+)\\\\)");
+ 	     	p.setLatitudeRegex("^-?([1-8]?[1-9]|[1-9]0)\\\\.{1}\\\\d{4,9}$");
+ 	     	p.setLongitudeRegex("^-?([1]?[1-7][1-9]|[1]?[1-8][0]|[1-9]?[0-9])\\\\.{1}\\\\d{4,9}$");
+ 	     	p.setLatlngRegex("([+-]?\\\\d+\\\\.?\\\\d+)\\\\s*,\\\\s*([+-]?\\\\d+\\\\.?\\\\d+)");
+ 	     	p.setPossiblenameRegex(".*[0-9]+.*");
+
+ 	p.setCountrycode("AT");
+ 	p.setShapes_file("/NUTS_2013_SHP/data/NUTS_RG_01M_2013.shp");
+
+ 	p.setGeonames_dbdriver("org.postgresql.Driver");
+ 	p.setGeonames_dburl("jdbc:postgresql://127.0.0.1:5432/geonames");
+ 	p.setGeonames_dbusr("postgres");
+ 	p.setGeonames_dbpwd("postgres");
+ 	
+ 	p.setWeb_dbdriver("web_dbdriver=org.postgresql.Driver");
+ 	p.setWeb_dburl("jdbc:postgresql://127.0.0.1:5432/spatialdatasearch");
+ 	p.setWeb_dbusr("postgres");
+ 	p.setWeb_dbpwd("postgres");
+
+p.setSt1postcode("select p.name,admin3name,code,p.latitude,p.longitude,g.population,g.elevation from postalcodes p inner join geoname g on p.admin3 = g.admin3 where code like ? order by code asc;");
+p.setSt2postcode("select p.name,admin3name,code,p.latitude,p.longitude,g.population,g.elevation from postalcodes p inner join geoname g on p.admin3 = g.admin3 where code = ? order by code asc;");
+p.setSt1city("select geonameid,name,latitude,longitude,population,elevation from geoname where asciiname = ? order by population desc;");
+p.setSt2city("select geonameid,name,latitude,longitude,population,elevation from geoname where asciiname like ? or asciiname like ? order by population desc;");
+p.setSt3city("select geonameid,name,latitude,longitude,population,elevation from geoname where asciiname like ? or asciiname like ? order by population desc;");
+
+    
+
+
+try {
+    entityManagerFactory = Persistence.createEntityManagerFactory("spatialdatasearch");
+    EntityManager entityManager = entityManagerFactory.createEntityManager();
+    entityManager.getTransaction().begin();
+    entityManager.persist(p);
+    entityManager.getTransaction().commit();
+    System.out.println("successfull");
+    entityManager.close();
+} catch (Exception e) {
+    e.printStackTrace();
+}
+//entityManager.createQuery("delete from routes").executeUpdate();
+
+    
+    
+    
+    
+    
 
     
 
